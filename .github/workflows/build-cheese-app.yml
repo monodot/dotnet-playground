@@ -4,12 +4,11 @@ on:
   release:
     types: [published]
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write  # Required for GitHub releases
 
     steps:
     - name: Checkout code
@@ -33,11 +32,6 @@ jobs:
       shell: powershell
 
     - name: Upload release asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v2
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./cheese-app-${{ github.event.release.tag_name }}.zip
-        asset_name: cheese-app-${{ github.event.release.tag_name }}.zip
-        asset_content_type: application/zip
+        files: cheese-app-${{ github.event.release.tag_name }}.zip
