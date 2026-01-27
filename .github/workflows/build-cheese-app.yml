@@ -1,0 +1,40 @@
+name: Cheese App - Build and Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore NuGet packages
+      run: nuget restore cheese-app/cheese-app.sln
+
+    - name: Build solution
+      run: msbuild cheese-app/cheese-app.sln /p:Configuration=Release /p:Platform="Any CPU"
+
+    - name: Package application
+      run: |
+        Compress-Archive -Path cheese-app/bin/* -DestinationPath cheese-app-${{ github.event.release.tag_name }}.zip
+      shell: powershell
+
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./cheese-app-${{ github.event.release.tag_name }}.zip
+        asset_name: cheese-app-${{ github.event.release.tag_name }}.zip
+        asset_content_type: application/zip
