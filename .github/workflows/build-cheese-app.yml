@@ -1,14 +1,10 @@
 name: Cheese App - Build and Release
 
-on:
-  release:
-    types: [published]
+on: push
 
 jobs:
   build:
     runs-on: windows-latest
-    permissions:
-      contents: write  # Required for GitHub releases
 
     steps:
     - name: Checkout code
@@ -33,5 +29,6 @@ jobs:
 
     - name: Upload release asset
       uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
       with:
         files: cheese-app-${{ github.event.release.tag_name }}.zip
