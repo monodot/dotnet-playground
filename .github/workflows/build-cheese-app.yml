@@ -22,10 +22,10 @@ jobs:
       run: nuget restore cheese-app/cheese-app.sln
 
     - name: Build and publish
-      run: msbuild cheese-app/cheese-app.csproj /t:Publish /p:Configuration=Release /p:PublishUrl=..\publish /p:DeployOnBuild=true
+      run: msbuild cheese-app/cheese-app.csproj /t:Publish /p:Configuration=Release /p:PublishUrl=${{ github.workspace }}\publish /p:DeployOnBuild=true
 
     - name: Package application
-      run: Compress-Archive -Path publish/* -DestinationPath cheese-app-build.zip -Force
+      run: Compress-Archive -Path ${{ github.workspace }}\publish\* -DestinationPath cheese-app-build.zip -Force
       shell: powershell
 
     - name: Upload release asset
