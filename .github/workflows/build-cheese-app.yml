@@ -26,11 +26,36 @@ jobs:
 
     - name: Package application
       run: |
-        Compress-Archive -Path cheese-app/bin/* -DestinationPath cheese-app-${{ github.event.release.tag_name }}.zip
+        $packageDir = "package"                                                                                       
+        New-Item -ItemType Directory -Path $packageDir -Force                                                         
+        
+        # Copy bin directory                                                                                          
+        Copy-Item -Path "cheese-app/bin" -Destination "$packageDir/bin" -Recurse -Force                               
+        
+        # Copy web application files                                                                                  
+        Copy-Item -Path "cheese-app/Global.asax" -Destination $packageDir -Force                                      
+        Copy-Item -Path "cheese-app/Web.config" -Destination $packageDir -Force                                       
+        
+        # Copy directories if they exist                                                                              
+        if (Test-Path "cheese-app/Views") {                                                                           
+            Copy-Item -Path "cheese-app/Views" -Destination "$packageDir/Views" -Recurse -Force                       
+        }                                                                                                             
+        if (Test-Path "cheese-app/Content") {                                                                         
+            Copy-Item -Path "cheese-app/Content" -Destination "$packageDir/Content" -Recurse -Force                   
+        }                                                                                                             
+        if (Test-Path "cheese-app/Scripts") {                                                                         
+            Copy-Item -Path "cheese-app/Scripts" -Destination "$packageDir/Scripts" -Recurse -Force                   
+        }                                                                                                             
+        if (Test-Path "cheese-app/favicon.ico") {                                                                     
+            Copy-Item -Path "cheese-app/favicon.ico" -Destination $packageDir -Force                                  
+        }                                                                                                             
+        
+        # Create the zip archive                                                                                      
+        Compress-Archive -Path "$packageDir/*" -DestinationPath "cheese-app-build.zip" -Force
       shell: powershell
 
     - name: Upload release asset
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
       with:
-        files: cheese-app-${{ github.event.release.tag_name }}.zip
+        files: cheese-app-build.zip
