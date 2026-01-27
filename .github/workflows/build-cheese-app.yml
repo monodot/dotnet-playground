@@ -21,37 +21,11 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore cheese-app/cheese-app.sln
 
-    - name: Build solution
-      run: msbuild cheese-app/cheese-app.sln /p:Configuration=Release /p:Platform="Any CPU"
+    - name: Build and publish
+      run: msbuild cheese-app/cheese-app.csproj /t:Publish /p:Configuration=Release /p:PublishUrl=..\publish /p:DeployOnBuild=true
 
     - name: Package application
-      run: |
-        $packageDir = "package"                                                                                       
-        New-Item -ItemType Directory -Path $packageDir -Force                                                         
-        
-        # Copy bin directory                                                                                          
-        Copy-Item -Path "cheese-app/bin" -Destination "$packageDir/bin" -Recurse -Force                               
-        
-        # Copy web application files                                                                                  
-        Copy-Item -Path "cheese-app/Global.asax" -Destination $packageDir -Force                                      
-        Copy-Item -Path "cheese-app/Web.config" -Destination $packageDir -Force                                       
-        
-        # Copy directories if they exist                                                                              
-        if (Test-Path "cheese-app/Views") {                                                                           
-            Copy-Item -Path "cheese-app/Views" -Destination "$packageDir/Views" -Recurse -Force                       
-        }                                                                                                             
-        if (Test-Path "cheese-app/Content") {                                                                         
-            Copy-Item -Path "cheese-app/Content" -Destination "$packageDir/Content" -Recurse -Force                   
-        }                                                                                                             
-        if (Test-Path "cheese-app/Scripts") {                                                                         
-            Copy-Item -Path "cheese-app/Scripts" -Destination "$packageDir/Scripts" -Recurse -Force                   
-        }                                                                                                             
-        if (Test-Path "cheese-app/favicon.ico") {                                                                     
-            Copy-Item -Path "cheese-app/favicon.ico" -Destination $packageDir -Force                                  
-        }                                                                                                             
-        
-        # Create the zip archive                                                                                      
-        Compress-Archive -Path "$packageDir/*" -DestinationPath "cheese-app-build.zip" -Force
+      run: Compress-Archive -Path publish/* -DestinationPath cheese-app-build.zip -Force
       shell: powershell
 
     - name: Upload release asset
