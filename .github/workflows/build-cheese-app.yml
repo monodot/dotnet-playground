@@ -19,7 +19,7 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Restore NuGet packages
-      run: nuget restore cheese-app/cheese-app.sln
+      run: nuget restore cheese-app/cheese-app.sln -PackagesDirectory cheese-app/packages
 
     - name: Build solution
       run: msbuild cheese-app/cheese-app.sln /p:Configuration=Release /p:Platform="Any CPU"
