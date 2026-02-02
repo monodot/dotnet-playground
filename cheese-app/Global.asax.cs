@@ -17,6 +17,10 @@ namespace cheese_app
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+            // Initialize Redis connection at startup to avoid lazy initialization during first request
+            // This ensures Redis spans properly nest under HTTP request spans
+            var _ = cheese_app.Services.RedisService.Connection;
         }
     }
 }
